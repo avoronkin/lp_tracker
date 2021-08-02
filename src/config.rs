@@ -7,7 +7,7 @@ use clap::Clap;
 struct Opts {
 
     #[clap(short, long)]
-    symbol: String,
+    symbols: String,
 
     #[clap(short, long)]
     from: NaiveDateTime,
@@ -15,7 +15,7 @@ struct Opts {
 
 #[derive(Debug)]
 pub struct Config {
-    pub symbol: String,
+    pub symbols: Vec<String>,
     pub from: DateTime<Utc>,
     pub to: DateTime<Utc>,
 }
@@ -25,7 +25,7 @@ impl Config {
         let opts = Opts::parse();
 
         Self {
-            symbol: opts.symbol,
+            symbols: opts.symbols.split(",").map(String::from).collect(),
             from: Utc.from_utc_datetime(&opts.from),
             to: Utc::now(),
         }

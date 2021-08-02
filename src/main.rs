@@ -17,20 +17,25 @@ fn main() {
 }
 
 fn run(config: config::Config) -> Result<()> {
-    let quotes = get_quotes(&config)?;
+    let mut wtr = csv::Writer::from_writer(io::stdout());
 
-    if let Some(record) = get_record(quotes, &config.symbol) {
-        let mut wtr = csv::Writer::from_writer(io::stdout());
-        wtr.serialize(record)?;
-        wtr.flush()?;
+    for symbol in config.symbols.iter() {
+
+        let quotes = get_quotes(&symbol, config.from, config.to)?;
+
+        if let Some(record) = get_record(quotes, symbol) {
+            wtr.serialize(record)?;
+        }
     }
+
+    wtr.flush()?;
 
     Ok(())
 }
 
-fn get_quotes(config: &config::Config) -> Result<Vec<yahoo_finance_api::Quote>> {
+fn get_quotes(symbol: &str, from: DateTime<Utc> , to: DateTime<Utc>) -> Result<Vec<yahoo_finance_api::Quote>> {
     let provider = yahoo::YahooConnector::new();
-    let response = provider.get_quote_history(&config.symbol, config.from, config.to)?;
+    let response = provider.get_quote_history(&symbol, from, to)?;
     let quotes = response.quotes()?;
 
     Ok(quotes)
